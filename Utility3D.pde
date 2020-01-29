@@ -10,6 +10,9 @@ abstract class BVHNode {
   //The lower boundary for this node
   protected PVector lowerBound;
   protected PVector upperBound;
+  
+  //Adds a vertex to the BVH leaf that contains the position at V
+  public abstract void add(Vertex v);
 
   public PVector getLowerBound() {
     return lowerBound;
@@ -38,9 +41,28 @@ abstract class BVHNode {
 }
 
 class BVHBranch extends BVHNode {
-  public static final int NUM_SUBDIVISIONS = 2;
-  BVHNode[][][] children = new BVHNode[NUM_SUBDIVISIONS][NUM_SUBDIVISIONS][NUM_SUBDIVISIONS];
-
+  public static final int DEFAULT_NUM_SUBDIVISIONS = 2;
+  BVHNode[][][] children;
+  
+  public BVHBranch(BVHBranch parent, PVector lowerBound, PVector upperBound){
+    this.parent = parent;
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
+    children = new BVHNode[DEFAULT_NUM_SUBDIVISIONS][DEFAULT_NUM_SUBDIVISIONS][DEFAULT_NUM_SUBDIVISIONS];
+  }
+  
+  public BVHBranch(BVHBranch parent, PVector lowerBound, PVector upperBound, int numSubdivisions){
+    this.parent = parent;
+    this.lowerBound = lowerBound;
+    this.upperBound = upperBound;
+    children = new BVHNode[numSubdivisions][numSubdivisions][numSubdivisions];
+  }
+  
+  public void add(Vertex v){
+    //TODO Stub
+    println("Called a stub in " + getClass());
+  }
+  
   public BVHLeaf getLeafFor(PVector position) {
     //Test if this branch contains the position
     if (!positionInBounds(position)) {
@@ -68,6 +90,11 @@ class BVHLeaf extends BVHNode {
   //We'll only need to append, iterate through, and pop from this list.
   //So a LinkedList is convenient for this scenario.
   LinkedList<PVector> verts;
+  
+  public void add(Vertex v){
+    //TODO Stub
+    println("Called a stub in " + getClass());
+  }
 
   public BVHLeaf getLeafFor(PVector position) {
     //Test if this branch contains the position
@@ -77,6 +104,12 @@ class BVHLeaf extends BVHNode {
     }
 
     return this;
+  }
+  
+  public BVHBranch transformToBranch(){
+    BVHBranch barry = new BVHBranch(parent, lowerBound, upperBound, 3);
+    //TODO Place all my vertices in Barry.
+    return barry;
   }
 }
 
