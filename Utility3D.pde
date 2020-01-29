@@ -1,6 +1,9 @@
 import java.util.LinkedList;
 
-//The Bounding Volume Heirarchy
+//TODO create BVH class that manages the bounding volume heirachy and
+//dynamically creates leaves and branches as necessary.
+
+//The nodes of a Bounding Volume Heirarchy
 abstract class BVHNode {  
   //The BVHNode that contains this BVHNode
   protected BVHBranch parent;
@@ -73,10 +76,7 @@ class BVHLeaf extends BVHNode {
       return parent.getLeafFor(position);
     }
 
-    //This branch has this position. Find it.
-    //TODO
-    println("Called a stub in " + getClass());
-    return null;
+    return this;
   }
 }
 
@@ -84,4 +84,15 @@ class BVHLeaf extends BVHNode {
 class Vertex {
   PVector location;
   BVHNode volumeContainer;
+  ArrayList<Triangle> triangles;
+}
+
+class Edge{
+  Vertex[] vertices = new Vertex[2];
+  Triangle[] adjacentTriangles = new Triangle[2];
+}
+
+class Triangle{
+  Vertex[] vertices = new Vertex[3];
+  Triangle[] adjacentTriangles = new Triangle[3];
 }
