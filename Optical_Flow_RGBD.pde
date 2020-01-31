@@ -12,9 +12,9 @@ void setup(){
   root.add(victor); //<>//
   
   
-  victor = new Vertex();
-  victor.location = new PVector(9,1,1);
-  root.add(victor);
+  Vertex vincent = new Vertex();
+  vincent.location = new PVector(9,1,1);
+  root.add(vincent);
 }
 void draw(){
   if(mousePressed){ //<>// //<>//
