@@ -1,5 +1,24 @@
 //TODO create BVH class that manages the bounding volume heirachy and
 //dynamically creates leaves and branches as necessary.
+class BVH{
+  BVHBranch root;
+  
+  public BVH(){
+    PVector lb = new PVector(-128,-128,-128);
+    PVector ub = new PVector( 128, 128, 128);
+    root = new BVHBranch(null, lb, ub);
+  }
+  
+  public void add(Vertex v){
+    //Check if v is bounded by the root node
+    if(root.positionInBounds(v)){
+      root.add(v);
+    }
+    //If not, create a new root that does contain it
+    //TODO
+  }
+}
+
 
 //The nodes of a Bounding Volume Heirarchy
 abstract class BVHNode {  
@@ -33,6 +52,10 @@ abstract class BVHNode {
     if (position.z < lowerBound.z) return false;
     if (position.z > upperBound.z) return false;
     return true;
+  }
+  
+  public boolean positionInBounds(Vertex position){
+    return positionInBounds(position.location);
   }
 
   public abstract BVHLeaf getLeafFor(PVector position);
