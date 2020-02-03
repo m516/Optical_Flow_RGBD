@@ -1,32 +1,42 @@
-//TODO create BVH class that manages the bounding volume heirachy and
-//dynamically creates leaves and branches as necessary.
-class BVH{
+class BVH { //<>//
   BVHBranch root;
-  
-  public BVH(){
-    PVector lb = new PVector(-128,-128,-128);
+
+  public BVH() {
+    PVector lb = new PVector(-128, -128, -128);
     PVector ub = new PVector( 128, 128, 128);
     root = new BVHBranch(null, lb, ub);
   }
-  
-  public void add(Vertex v){
+
+  public void add(Vertex v) {
     //Check if v is bounded by the root node
-    if(root.positionInBounds(v)){
-      root.add(v);
+    while (!root.positionInBounds(v)) {
+      PVector dim = root.getDimension();
+      PVector lb = PVector.sub(root.lowerBound, dim);
+      PVector ub = PVector.add(root.upperBound, dim);
+      BVHBranch newRoot = new BVHBranch(null, lb, ub, 3);
+      root.parent = newRoot;
+      newRoot.initializeChildren();
+      newRoot.children[1][1][1] = root;
+      root = newRoot;
     }
-    //If not, create a new root that does contain it
-    //TODO
+    root.add(v);
+    return;
+  }
+  
+  public void draw(){
+    root.drawVertices(); //<>//
   }
 }
 
 
 //The nodes of a Bounding Volume Heirarchy
-abstract class BVHNode {  
+abstract class BVHNode {
   //The BVHNode that contains this BVHNode
   protected BVHBranch parent;
   //The lower boundary for this node
   protected PVector lowerBound;
   protected PVector upperBound;
+  protected int numVertices;
 
   //Adds a vertex to the BVH leaf that contains the position at V
   public abstract void add(Vertex v);
@@ -45,7 +55,7 @@ abstract class BVHNode {
   }
 
   public boolean positionInBounds(PVector position) {
-    if (position.x < lowerBound.x) return false; //<>//
+    if (position.x < lowerBound.x) return false;
     if (position.x > upperBound.x) return false;
     if (position.y < lowerBound.y) return false;
     if (position.y > upperBound.y) return false;
@@ -53,12 +63,18 @@ abstract class BVHNode {
     if (position.z > upperBound.z) return false;
     return true;
   }
-  
-  public boolean positionInBounds(Vertex position){
+
+  public boolean positionInBounds(Vertex position) {
     return positionInBounds(position.location);
   }
+  
+  public abstract void drawVertices();
 
   public abstract BVHLeaf getLeafFor(PVector position);
+  
+  public int vertexCount(){
+    return numVertices;
+  }
 }
 
 class BVHBranch extends BVHNode {
@@ -87,7 +103,7 @@ class BVHBranch extends BVHNode {
   }
 
   private void initializeChildren() {
-    PVector dim = getDimension(); //<>//
+    PVector dim = getDimension();
     for (int i = 0; i < children.length; i++) {
       for (int j = 0; j < children[i].length; j++) {
         for (int k = 0; k < children[i][j].length; k++) {
@@ -99,9 +115,9 @@ class BVHBranch extends BVHNode {
           ub.x = lowerBound.x + float(i+1) / float(numSubdivisions) * dim.x;
           ub.y = lowerBound.y + float(j+1) / float(numSubdivisions) * dim.y;
           ub.z = lowerBound.z + float(k+1) / float(numSubdivisions) * dim.z;
-          children[i][j][k] = new BVHLeaf(this, 
-          lb,
-          ub);
+          children[i][j][k] = new BVHLeaf(this,
+            lb,
+            ub);
         }
       }
     }
@@ -109,35 +125,37 @@ class BVHBranch extends BVHNode {
 
   public void add(Vertex v) {
     println("Entering " + toString());
-    
+
     PVector l = v.location;
-    if(!positionInBounds(l)){
+    if (!positionInBounds(l)) {
       println("Vertex not bounded by " + toString());
       parent.add(v);
     }
-    
+
     //The position of the vertex relative to the lower bound of this branch
     PVector r = l.copy().sub(lowerBound);
     //The dimension of this branch
     PVector d = getDimension();
-    
+
     //Calculate the indices of the node that this vertex should go to.
     //i.e. redirect the vertex to go to its appropriate child BVH node
-    int i = int(r.x/d.x*numSubdivisions); 
-    int j = int(r.y/d.y*numSubdivisions); 
-    int k = int(r.z/d.z*numSubdivisions); 
-    
+    int i = int(r.x/d.x*numSubdivisions);
+    int j = int(r.y/d.y*numSubdivisions);
+    int k = int(r.z/d.z*numSubdivisions);
+
     children[i][j][k].add(v);
-    
+
     //If it's a leaf
-    if(children[i][j][k] instanceof BVHLeaf){
+    if (children[i][j][k] instanceof BVHLeaf) {
       //Split it if necessary
       BVHLeaf bart = (BVHLeaf) children[i][j][k];
-      if(bart.readyToSplit()){
+      if (bart.readyToSplit()) {
         BVHBranch barry = bart.transformToBranch();
         children[i][j][k] = barry; //Sorry Bart.
       }
     }
+    
+    numVertices++;
   }
 
   public BVHLeaf getLeafFor(PVector position) {
@@ -157,8 +175,18 @@ class BVHBranch extends BVHNode {
     int sectorX = int(relativePosition.x*float(numSubdivisions));
     int sectorY = int(relativePosition.y*float(numSubdivisions));
     int sectorZ = int(relativePosition.z*float(numSubdivisions));
-
+ //<>//
     return children[sectorX][sectorY][sectorZ].getLeafFor(position);
+  }
+  
+  public void drawVertices(){
+    for (int i = 0; i < children.length; i++) {
+      for (int j = 0; j < children[i].length; j++) {
+        for (int k = 0; k < children[i][j].length; k++) {
+          children[i][j][k].drawVertices();
+        }
+      }
+    }
   }
 }
 import java.util.LinkedList;
@@ -168,10 +196,10 @@ class BVHLeaf extends BVHNode {
   //We'll only need to append, iterate through, and pop from this list.
   //So a LinkedList is convenient for this scenario.
   LinkedList<Vertex> verts;
-  
+
   //The number of vertices to store until requesting a transformation to a BVH branch
   public static final int MAX_VERTICES = 100;
-  
+
   public BVHLeaf(BVHBranch parent, PVector lowerBound, PVector upperBound) {
     this.parent = parent;
     this.lowerBound = lowerBound;
@@ -186,11 +214,19 @@ class BVHLeaf extends BVHNode {
   public void add(Vertex v) {
     println("Entering " + toString());
     
+    //Get the location of this vertex
     PVector l = v.location;
-    if(!positionInBounds(l)){
+    
+    //Check if the vertex is bounded by this leaf
+    if (!positionInBounds(l)) {
       println("Vertex not bounded by " + toString());
-      parent.add(v);
+      parent.add(v); //Not my problem!
+      return;
     }
+    
+    verts.add(v);
+    
+    numVertices=verts.size();
   }
 
   public BVHLeaf getLeafFor(PVector position) {
@@ -205,14 +241,22 @@ class BVHLeaf extends BVHNode {
 
   public BVHBranch transformToBranch() {
     BVHBranch barry = new BVHBranch(parent, lowerBound, upperBound, 3);
-    while(!verts.isEmpty()){
+    while (!verts.isEmpty()) {
       Vertex victor = verts.pop();
       barry.add(victor);
     }
     return barry;
   }
-  
-  public boolean readyToSplit(){
+ //<>//
+  public boolean readyToSplit() {
     return verts.size()>=MAX_VERTICES;
+  }
+  
+  public void drawVertices(){
+    beginShape(POINTS);
+    for(Vertex v: verts){
+      vertex(v.location.x,v.location.y,v.location.z); //<>//
+    }
+    endShape();
   }
 }
