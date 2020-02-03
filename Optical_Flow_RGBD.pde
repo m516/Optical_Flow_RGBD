@@ -1,26 +1,38 @@
+import peasy.*; //<>// //<>// //<>// //<>//
+
 RGBDImage img;
+PeasyCam cam;
+
+BVH bvh;
 
 void setup(){
-  size(1280,720); //<>// //<>//
-  img = loadRGBDImage(2);
+  //Set up renderer
+  size(1280,720, P3D); //<>//
+  smooth(8);
   
-  PVector lb = new PVector(0,0,0);
-  PVector ub = new PVector(10,10,10);
-  BVHBranch root = new BVHBranch(null, lb, ub);
+  
+  cam = new PeasyCam(this, 1000);
+    
+    
+  //Create the BVH and add points to it
+  bvh = new BVH();
   Vertex victor = new Vertex();
-  victor.location = new PVector(5,5,5); //<>//
-  root.add(victor); //<>//
-  
+  victor.location = new PVector(5,5,5);
+  bvh.add(victor);
   
   Vertex vincent = new Vertex();
-  vincent.location = new PVector(9,1,1);
-  root.add(vincent);
+  vincent.location = new PVector(129,129,129);
+  bvh.add(vincent);
+  
+  img = loadRGBDImage(2);
 }
 void draw(){
-  if(mousePressed){ //<>// //<>//
-    image(img.getRGBImage(), 0, 0);    
-  }
-  else{
-    image(img.getDepthImage(), 0, 0);
-  }
+  background(32);
+  stroke(255);
+  strokeWeight(8);
+  fill(64,128,255);
+  lights();
+  box(100);
+  bvh.draw();
+  
 }
