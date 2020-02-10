@@ -1,4 +1,4 @@
-class BVH { //<>//
+class BVH { //<>// //<>// //<>// //<>// //<>//
   BVHBranch root;
 
   public BVH() {
@@ -22,9 +22,15 @@ class BVH { //<>//
     root.add(v);
     return;
   }
-  
-  public void draw(){
-    root.drawVertices(); //<>//
+
+  public void draw() {
+    beginShape(TRIANGLES);
+    root.draw();
+    endShape();
+  }
+
+  public void drawVertices() {
+    root.drawVertices();
   }
 }
 
@@ -67,16 +73,41 @@ abstract class BVHNode {
   public boolean positionInBounds(Vertex position) {
     return positionInBounds(position.location);
   }
-  
+
+  //Returns true if this method modified the destination
+  public abstract boolean findClosestVertices(Vertex v, Vertex[] dest);
+
   public abstract void drawVertices();
+  public abstract void draw();
 
   public abstract BVHLeaf getLeafFor(PVector position);
-  
-  public int vertexCount(){
+
+  public int vertexCount() {
     return numVertices;
+  }
+
+  public PVector getClosestPointTo(Vertex v) {
+    return getClosestPointTo(v.location);
+  }
+
+  public PVector getClosestPointTo(PVector v) {
+    PVector r = new PVector();
+    r.x = constrain(v.x, lowerBound.x, upperBound.x);
+    r.y = constrain(v.y, lowerBound.y, upperBound.y);
+    r.z = constrain(v.z, lowerBound.z, upperBound.z);
+    return r;
+  }
+  
+  public PVector getFarthestPointFrom(PVector v) {
+    PVector r = getClosestPointTo(v);
+    r.x = upperBound.x-(r.x-lowerBound.x);
+    r.y = upperBound.y-(r.y-lowerBound.y);
+    r.z = upperBound.z-(r.z-lowerBound.z);
+    return r;
   }
 }
 
+//A node that contains nultiple nodes
 class BVHBranch extends BVHNode {
   private int numSubdivisions = 2;
   BVHNode[][][] children;
@@ -154,7 +185,7 @@ class BVHBranch extends BVHNode {
         children[i][j][k] = barry; //Sorry Bart.
       }
     }
-    
+
     numVertices++;
   }
 
@@ -175,15 +206,63 @@ class BVHBranch extends BVHNode {
     int sectorX = int(relativePosition.x*float(numSubdivisions));
     int sectorY = int(relativePosition.y*float(numSubdivisions));
     int sectorZ = int(relativePosition.z*float(numSubdivisions));
- //<>//
+
     return children[sectorX][sectorY][sectorZ].getLeafFor(position);
   }
-  
-  public void drawVertices(){
+
+  public boolean findClosestVertices(Vertex v, Vertex[] dest) {
+    PVector position = getClosestPointTo(v);
+    //This branch has this position. Find it.
+    PVector relativePosition = position.copy().sub(lowerBound);
+    PVector dimension = getDimension();
+    relativePosition.x /= dimension.x;
+    relativePosition.y /= dimension.y;
+    relativePosition.z /= dimension.z;
+
+    int sectorX = int(relativePosition.x*float(numSubdivisions));
+    int sectorY = int(relativePosition.y*float(numSubdivisions));
+    int sectorZ = int(relativePosition.z*float(numSubdivisions));
+
+    boolean keepSearching = false;
+
+    //TODO search that sector first
+    if (!children[sectorX][sectorY][sectorZ].findClosestVertices(v, dest)) return false;
+    //Then search the rest of them
+    for (int i = 0; i < children.length; i++) {
+      for (int j = 0; j < children[i].length; j++) {
+        for (int k = 0; k < children[i][j].length; k++) {
+          if (i == sectorX &&
+            j == sectorY &&
+            k == sectorX) continue;
+
+          if (children[i][j][k].findClosestVertices(v, dest)) {
+            if (i == 0 || i == children.length - 1 ||
+              j == 0 || j == children[sectorX].length - 1 ||
+              k == 0 || k == children[sectorX][sectorY].length - 1) keepSearching = true;
+          }
+        }
+      }
+    }
+
+
+
+    return keepSearching;
+  }
+
+  public void drawVertices() {
     for (int i = 0; i < children.length; i++) {
       for (int j = 0; j < children[i].length; j++) {
         for (int k = 0; k < children[i][j].length; k++) {
           children[i][j][k].drawVertices();
+        }
+      }
+    }
+  }
+  public void draw() {
+    for (int i = 0; i < children.length; i++) {
+      for (int j = 0; j < children[i].length; j++) {
+        for (int k = 0; k < children[i][j].length; k++) {
+          children[i][j][k].draw();
         }
       }
     }
@@ -213,19 +292,19 @@ class BVHLeaf extends BVHNode {
 
   public void add(Vertex v) {
     println("Entering " + toString());
-    
+
     //Get the location of this vertex
     PVector l = v.location;
-    
+
     //Check if the vertex is bounded by this leaf
     if (!positionInBounds(l)) {
       println("Vertex not bounded by " + toString());
       parent.add(v); //Not my problem!
       return;
     }
-    
+
     verts.add(v);
-    
+
     numVertices=verts.size();
   }
 
@@ -247,16 +326,67 @@ class BVHLeaf extends BVHNode {
     }
     return barry;
   }
- //<>//
+
   public boolean readyToSplit() {
     return verts.size()>=MAX_VERTICES;
   }
-  
-  public void drawVertices(){
+
+  public boolean findClosestVertices(Vertex v, Vertex[] dest) {
+    //Don't do anything if there aren't any vertices
+    if (numVertices==0) return true;
+
+    //Check if it is possible for there to be a closer vector
+    float minDistance = Float.POSITIVE_INFINITY;
+    minDistance = min(dest[0].distanceTo(v), minDistance);
+
+    //Get the closest possible point to the vertex
+    float myDistance = v.distanceTo(getClosestPointTo(v));
+
+    //Don't do anything if there can't possibly be a point in this leaf that is closer to this one
+    if (myDistance>minDistance) return false;
+
+    //Go through all the points in this leaf and add them to dest in order of distance
+    for (Vertex w : verts) {
+      float currentDistance = w.distanceTo(v);
+      //Iterate through all the points who claim to be the closest to v and test their closeness
+      for (int i = 0; i < dest.length; i++) {
+        //Add the point if there's nothing to replace it
+        if (dest[i] == null) {
+          dest[i] = w;
+          break;
+        }
+        float distanceInDest = v.distanceTo(dest[i]);
+        //Bump all the points back if w is closer to v than dest[i]
+        //Kind of like insertion sort an an array that's being populated with w
+        if (currentDistance<distanceInDest) {
+          for (int j = dest.length-2; j >= i; j--)
+            dest[j+1] = dest[j];
+          dest[i] = w;
+          break;
+        }
+        //Otherwise keep searching
+      }
+    }
+
+    //Keep searching
+    return true;
+  }
+
+  public void drawVertices() {
     beginShape(POINTS);
-    for(Vertex v: verts){
-      vertex(v.location.x,v.location.y,v.location.z); //<>//
+    for (Vertex v : verts) {
+      vertex(v.location.x, v.location.y, v.location.z);
     }
     endShape();
+  }
+
+  public void draw() {
+    for (Vertex v : verts) {
+      for (Triangle t : v.triangles) {
+        if (t.vertices[0]==v) {
+          t.draw();
+        }
+      }
+    }
   }
 }

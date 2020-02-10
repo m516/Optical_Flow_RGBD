@@ -17,12 +17,23 @@ void setup(){
   //Create the BVH and add points to it
   bvh = new BVH();
   Vertex victor = new Vertex();
-  victor.location = new PVector(5,5,5);
+  victor.location = new PVector(0,0,0);
   bvh.add(victor);
   
   Vertex vincent = new Vertex();
-  vincent.location = new PVector(129,129,129);
+  vincent.location = new PVector(100,0,0);
   bvh.add(vincent);
+  
+  Vertex velma = new Vertex();
+  velma.location = new PVector(100,100,0);
+  bvh.add(velma);
+  
+  Vertex violet = new Vertex(0,-100,0);
+  bvh.add(violet);
+  
+  Triangle tri = new Triangle(victor, vincent, velma);
+  
+  tri.extrude01(violet);
   
   img = loadRGBDImage(2);
 }
@@ -32,7 +43,7 @@ void draw(){
   strokeWeight(8);
   fill(64,128,255);
   lights();
-  box(100);
   bvh.draw();
+  bvh.drawVertices();
   
 }
