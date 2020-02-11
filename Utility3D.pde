@@ -87,6 +87,26 @@ class Triangle {
     return travis;
   }
   
+  //Creates a new triangle from this one.
+  //It is formed by vertices 1 and 2
+  //and another point.
+  Triangle extrude12(Vertex v){
+    Triangle travis = new Triangle(vertices[2], vertices[1], v);
+    adjacentTriangles[1] = travis;
+    travis.adjacentTriangles[1] = this;
+    return travis;
+  }
+  
+  //Creates a new triangle from this one.
+  //It is formed by vertices 2 and 0
+  //and another point.
+  Triangle extrude20(Vertex v){
+    Triangle travis = new Triangle(vertices[0], vertices[2], v);
+    adjacentTriangles[2] = travis;
+    travis.adjacentTriangles[2] = this;
+    return travis;
+  }
+  
   void draw(){
     vertex(vertices[0].location.x,vertices[0].location.y,vertices[0].location.z);
     vertex(vertices[1].location.x,vertices[1].location.y,vertices[1].location.z);
