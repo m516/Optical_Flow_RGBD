@@ -11,6 +11,8 @@ class RGBDImage{
   PVector location;
   PVector rotation;
   
+  float min = 2.2;
+  float max = 6.4;
   
   public RGBDImage(PImage rgb, PImage depth){
     this.rgb = rgb;
@@ -23,6 +25,15 @@ class RGBDImage{
   
   public PImage getDepthImage(){
     return depth;
+  }
+  
+  public float getDepthAt(float x, float y){
+    color c = depth.get(int(x), int(y));
+    return map(red(c),0,255,min,max);
+  }
+  
+  public color getColorAt(float x, float y){
+    return rgb.get(int(x), int(y));
   }
 }
 
