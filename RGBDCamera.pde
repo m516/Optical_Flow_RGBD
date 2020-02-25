@@ -82,19 +82,19 @@ class RGBDCameraSimulation extends RGBDCamera{
     return true;
   }
   
-  color getColorAtImage(float imageX, float imageY){
+  public color getColorAtImage(float imageX, float imageY){
     println("Called a stub in " + getClass());
     return #000000; //TODO Stub
   }
-  color getColorAtAngle(float theta,  float rho){
+  public color getColorAtAngle(float theta,  float rho){
     println("Called a stub in " + getClass());
     return #000000; //TODO Stub
   }
-  float getDepthAtImage(float imageX, float imageY){
+  public float getDepthAtImage(float imageX, float imageY){
     println("Called a stub in " + getClass());
     return Float.NaN; //TODO Stub
   }
-  float getDepthAtAngle(float theta,  float rho){
+  public float getDepthAtAngle(float theta,  float rho){
     println("Called a stub in " + getClass());
     return Float.NaN; //TODO Stub
   }

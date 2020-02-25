@@ -4,6 +4,7 @@ RGBDImage img;
 PeasyCam cam;
 
 BVH bvh;
+boolean autoRotate = true;
 
 void setup(){
   //Set up renderer
@@ -16,34 +17,53 @@ void setup(){
     
   //Create the BVH and add points to it
   bvh = new BVH();
-  Vertex victor = new Vertex();
-  victor.location = new PVector(0,0,0);
-  bvh.add(victor);
-  
-  Vertex vincent = new Vertex();
-  vincent.location = new PVector(100,0,0);
-  bvh.add(vincent);
-  
-  Vertex velma = new Vertex();
-  velma.location = new PVector(100,100,0);
-  bvh.add(velma);
-  
-  Vertex violet = new Vertex(0,-100,0);
-  bvh.add(violet);
-  
-  Triangle tri = new Triangle(victor, vincent, velma);
-  
-  tri.extrude01(violet);
   
   img = loadRGBDImage(2);
 }
 void draw(){
+  if(autoRotate){
+    cam.rotateY(.01);
+  }
+  
   background(32);
-  stroke(255);
-  strokeWeight(8);
-  fill(64,128,255);
   lights();
   bvh.draw();
   bvh.drawVertices();
   
+}
+
+void mousePressed(){
+  autoRotate = false;
+}
+
+void keyPressed(){
+  if(key=='a'){
+    autoRotate = true;
+    return;
+  }
+  bvh.clear();
+  
+  Vertex victor = new Vertex();
+  victor.location = PVector.random3D();
+  victor.location.mult(100);
+  bvh.add(victor);
+  
+  Vertex vincent = new Vertex();
+  vincent.location = PVector.random3D();
+  vincent.location.mult(100);
+  bvh.add(vincent);
+  
+  Vertex velma = new Vertex();
+  velma.location = PVector.random3D();
+  velma.location.mult(100);
+  bvh.add(velma);
+  
+  Vertex violet = new Vertex(PVector.random3D());
+  violet.location.mult(100);
+  bvh.add(violet);
+  
+  Triangle tri = new Triangle(victor, vincent, velma);
+  tri.commitToVertices();
+  
+  tri.add(violet);
 }

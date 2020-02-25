@@ -8,8 +8,10 @@ class BVH { //<>// //<>// //<>// //<>// //<>//
   }
 
   public void add(Vertex v) {
+    println("Adding a point to the BVH");
     //Check if v is bounded by the root node
     while (!root.positionInBounds(v)) {
+      println("Bounds not big enough. Expanding");
       PVector dim = root.getDimension();
       PVector lb = PVector.sub(root.lowerBound, dim);
       PVector ub = PVector.add(root.upperBound, dim);
@@ -22,11 +24,13 @@ class BVH { //<>// //<>// //<>// //<>// //<>//
     root.add(v);
     return;
   }
+  
+  public void clear(){
+    root.clear();
+  }
 
   public void draw() {
-    beginShape(TRIANGLES);
     root.draw();
-    endShape();
   }
 
   public void drawVertices() {
@@ -46,6 +50,9 @@ abstract class BVHNode {
 
   //Adds a vertex to the BVH leaf that contains the position at V
   public abstract void add(Vertex v);
+  
+  //Clears all the elements
+  public abstract void clear();
 
   public PVector getLowerBound() {
     return lowerBound;
@@ -188,6 +195,16 @@ class BVHBranch extends BVHNode {
 
     numVertices++;
   }
+  
+  public void clear(){
+    for (int i = 0; i < children.length; i++) {
+      for (int j = 0; j < children[i].length; j++) {
+        for (int k = 0; k < children[i][j].length; k++) {
+          children[i][j][k].clear();
+        }
+      }
+    }
+  }
 
   public BVHLeaf getLeafFor(PVector position) {
     //Test if this branch contains the position
@@ -259,6 +276,7 @@ class BVHBranch extends BVHNode {
     }
   }
   public void draw() {
+   
     for (int i = 0; i < children.length; i++) {
       for (int j = 0; j < children[i].length; j++) {
         for (int k = 0; k < children[i][j].length; k++) {
@@ -266,6 +284,20 @@ class BVHBranch extends BVHNode {
         }
       }
     }
+    
+    //Draw a box around the bounds
+    noFill();
+    stroke(255,0,0);
+    strokeWeight(2);
+    pushMatrix();
+    PVector mid = lowerBound.copy();
+    mid.add(upperBound);
+    mid.div(2);
+    PVector size = upperBound.copy();
+    size.sub(lowerBound);
+    translate(mid.x,mid.y,mid.z);
+    box(size.x,size.y,size.z);
+    popMatrix();
   }
 }
 import java.util.LinkedList;
@@ -289,7 +321,12 @@ class BVHLeaf extends BVHNode {
     print("\tUB: ");
     println(upperBound);
   }
-
+  
+  public void clear(){
+    verts.clear();
+  }
+  
+  
   public void add(Vertex v) {
     println("Entering " + toString());
 
@@ -381,12 +418,34 @@ class BVHLeaf extends BVHNode {
   }
 
   public void draw() {
+        
+    stroke(255);
+    strokeWeight(8);
+    fill(64,128,255);
+    
+    
+    //Draw the triangles
+    
+    beginShape(TRIANGLES);
     for (Vertex v : verts) {
       for (Triangle t : v.triangles) {
-        if (t.vertices[0]==v) {
-          t.draw();
-        }
+          t.draw(); //<>//
       }
     }
+    endShape();
+    
+    //Draw a box around the bounds
+    noFill();
+    stroke(0,255,0);
+    strokeWeight(1);
+    pushMatrix();
+    PVector mid = lowerBound.copy();
+    mid.add(upperBound);
+    mid.div(2);
+    PVector size = upperBound.copy();
+    size.sub(lowerBound);
+    translate(mid.x,mid.y,mid.z);
+    box(size.x,size.y,size.z);
+    popMatrix();
   }
 }
