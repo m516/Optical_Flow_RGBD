@@ -120,8 +120,11 @@ class Triangle {
   
   //Returns the normal for this triangle
   PVector normal(){
-    PVector ret = vertices[1].location.copy();
-    ret.cross(vertices[1].location);
+    PVector ret = vertices[0].location.copy();
+    ret.sub(vertices[1].location);
+    PVector edge2 = vertices[0].location.copy();
+    edge2.sub(vertices[2].location);
+    ret.cross(edge2);
     return ret;
   }
   
@@ -153,21 +156,38 @@ class Triangle {
   
   void add(Vertex v){
     //Project the vertex v onto the plane containing the triangle
-    PVector projectedPos = v.location.copy();
+    PVector projectedPos = v.location.copy(); //<>//
     PVector normal = normal();
+    normal.normalize();
     float dist = projectedPos.dot(normal);
     normal.setMag(dist);
     projectedPos.sub(normal);
     
     float a = area();
-    float a0 = area(vertices[0], vertices[1], v);
-    float a1 = area(vertices[1], vertices[2], v);
-    float a2 = area(vertices[2], vertices[0], v);
+    float a0 = area(vertices[0].location, vertices[1].location, projectedPos);
+    float a1 = area(vertices[1].location, vertices[2].location, projectedPos);
+    float a2 = area(vertices[2].location, vertices[0].location, projectedPos);
+    println(projectedPos);
+    println(a);
+    println(a0);
+    println(a1);
+    println(a2);
     float p0 = perimeter(vertices[0], vertices[1], v);
     float p1 = perimeter(vertices[1], vertices[2], v);
     float p2 = perimeter(vertices[2], vertices[0], v);
-    float splitAreaToPerimeterRatio = (p0+p1+p2)/3;
+    float splitAreaToPerimeterRatio = (a0+a1+a2);
     
+    
+    
+    //Case 1: the point is inside the triangle
+    if(splitAreaToPerimeterRatio<a*1.01){
+      split(v);
+      return;
+    }
+    
+    
+    PVector temp = v.location;
+    v.location = projectedPos;
     
     //Generate all posibilities of couples of triangles.
     Vertex[] vertPool = {vertices[0],vertices[1],vertices[2],v};
@@ -184,7 +204,7 @@ class Triangle {
       //Ceate a pair of triangles and get their perimeter
       Triangle t1 = new Triangle(vertPool[i1[i]],vertPool[i2[i]],vertPool[i1[5-i]]);
       Triangle t2 = new Triangle(vertPool[i1[i]],vertPool[i2[i]],vertPool[i2[5-i]]);
-      float thisRatio = (t1.perimeter()+t2.perimeter())/2;
+      float thisRatio = (t1.area()+t2.area());
       //Use this ratio to find the roundest pair of triangles
       if(thisRatio<maxAreaToPerimeterRatio){
         maxAreaToPerimeterRatio = thisRatio;
@@ -194,11 +214,7 @@ class Triangle {
       }
     }
     
-    //Case 1: the point is inside the triangle
-    if(splitAreaToPerimeterRatio<maxAreaToPerimeterRatio){
-      split(v);
-      return;
-    }
+    v.location = temp;
     
     //Case 2: the point is outside the triangle
     //To optimize triangle structure, every triangle has a master vertex at
