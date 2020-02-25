@@ -420,7 +420,7 @@ class BVHLeaf extends BVHNode {
   public void draw() {
         
     stroke(255);
-    strokeWeight(8);
+    strokeWeight(2);
     fill(64,128,255);
     
     
@@ -429,7 +429,7 @@ class BVHLeaf extends BVHNode {
     beginShape(TRIANGLES);
     for (Vertex v : verts) {
       for (Triangle t : v.triangles) {
-          t.draw(); //<>//
+          t.draw();
       }
     }
     endShape();

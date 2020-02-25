@@ -4,13 +4,17 @@ RGBDImage img;
 PeasyCam cam;
 
 BVH bvh;
+Triangle tri;
 boolean autoRotate = true;
+
+
 
 void setup(){
   //Set up renderer
   size(1280,720, P3D); //<>//
-  smooth(8);
-  
+  frameRate(40);
+  hint(DISABLE_OPENGL_ERRORS);
+  hint(DISABLE_TEXTURE_MIPMAPS);
   
   cam = new PeasyCam(this, 1000);
     
@@ -29,6 +33,14 @@ void draw(){
   lights();
   bvh.draw();
   bvh.drawVertices();
+  
+  if(tri!=null){
+    stroke(255,255,0);
+    strokeWeight(6);
+    beginShape(TRIANGLES);
+    tri.draw();
+    endShape();
+  }
   
 }
 
@@ -62,7 +74,7 @@ void keyPressed(){
   violet.location.mult(100);
   bvh.add(violet);
   
-  Triangle tri = new Triangle(victor, vincent, velma);
+  tri = new Triangle(victor, vincent, velma);
   tri.commitToVertices();
   
   tri.add(violet);
