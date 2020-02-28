@@ -14,8 +14,10 @@ class Vertex {
     location = new PVector(x, y, z);
   }
   
-  public void makeTriangle(Vertex v2, Vertex v3){
+  public Triangle makeTriangle(Vertex v2, Vertex v3){
     Triangle t = new Triangle(this, v2, v3);
+    t.commitToVertices();
+    return t;
   }
   
   public float distanceTo(Vertex other){
