@@ -1,4 +1,6 @@
-class BVH { //<>// //<>// //<>// //<>// //<>//
+import java.util.LinkedList; //<>//
+
+class BVH {
   BVHBranch root;
 
   public BVH() {
@@ -300,7 +302,6 @@ class BVHBranch extends BVHNode {
     popMatrix();
   }
 }
-import java.util.LinkedList;
 
 class BVHLeaf extends BVHNode {
   //The list of vertices that are exclusively in this BVH
