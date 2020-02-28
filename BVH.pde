@@ -1,6 +1,4 @@
-import java.util.LinkedList; //<>//
-
-class BVH {
+class BVH { //<>//
   BVHBranch root;
 
   public BVH() {
@@ -307,7 +305,7 @@ class BVHLeaf extends BVHNode {
   //The list of vertices that are exclusively in this BVH
   //We'll only need to append, iterate through, and pop from this list.
   //So a LinkedList is convenient for this scenario.
-  LinkedList<Vertex> verts;
+  ArrayList<Vertex> verts;
 
   //The number of vertices to store until requesting a transformation to a BVH branch
   public static final int MAX_VERTICES = 100;
@@ -316,7 +314,7 @@ class BVHLeaf extends BVHNode {
     this.parent = parent;
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
-    verts = new LinkedList<Vertex>();
+    verts = new ArrayList<Vertex>();
     print("LB: ");
     print(lowerBound);
     print("\tUB: ");
@@ -359,7 +357,7 @@ class BVHLeaf extends BVHNode {
   public BVHBranch transformToBranch() {
     BVHBranch barry = new BVHBranch(parent, lowerBound, upperBound, 3);
     while (!verts.isEmpty()) {
-      Vertex victor = verts.pop();
+      Vertex victor = verts.remove(verts.size()-1);
       barry.add(victor);
     }
     return barry;
