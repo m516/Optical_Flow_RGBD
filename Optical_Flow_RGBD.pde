@@ -1,4 +1,4 @@
-import peasy.*; //<>// //<>// //<>// //<>//
+import peasy.*; //<>//
 
 RGBDImage img;
 PeasyCam cam;
@@ -57,21 +57,20 @@ void keyPressed(){
   
   Vertex victor = new Vertex();
   victor.location = PVector.random3D();
-  victor.location.mult(100);
+  victor.location.mult(200);
   bvh.add(victor);
   
   Vertex vincent = new Vertex();
   vincent.location = PVector.random3D();
-  vincent.location.mult(100);
+  vincent.location.mult(200);
   bvh.add(vincent);
   
   Vertex velma = new Vertex();
   velma.location = PVector.random3D();
-  velma.location.mult(100);
+  velma.location.mult(200);
   bvh.add(velma);
   
-  Vertex violet = new Vertex(PVector.random3D());
-  violet.location.mult(100);
+  Vertex violet = new Vertex(new PVector(0,0,0));
   bvh.add(violet);
   
   tri = new Triangle(victor, vincent, velma);
