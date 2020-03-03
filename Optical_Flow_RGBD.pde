@@ -1,4 +1,6 @@
-import peasy.*; //<>//
+import pallav.Matrix.*; //<>// //<>//
+
+import peasy.*;
 
 RGBDImage img;
 PeasyCam cam;
@@ -6,12 +8,12 @@ PeasyCam cam;
 BVH bvh;
 Triangle tri;
 boolean autoRotate = true;
-
+PVector closest = null;
 
 
 void setup(){
   //Set up renderer
-  size(1280,720, P3D); //<>//
+  size(1280,720, P3D);
   frameRate(40);
   hint(DISABLE_OPENGL_ERRORS);
   hint(DISABLE_TEXTURE_MIPMAPS);
@@ -31,6 +33,7 @@ void draw(){
   
   background(32);
   lights();
+  specular(100);
   bvh.draw();
   bvh.drawVertices();
   
@@ -40,6 +43,27 @@ void draw(){
     beginShape(TRIANGLES);
     tri.draw();
     endShape();
+    
+    fill(255,128,0);
+    noStroke();
+    
+    
+    PVector p = tri.vertices[0].location;
+    pushMatrix();
+    translate(p.x,p.y,p.z);
+    sphere(16);
+    popMatrix();
+    
+    
+    if(closest!=null){
+      fill(128,255,0);
+      pushMatrix();
+      translate(closest.x,closest.y,closest.z);
+      sphere(16);
+      popMatrix();
+    }
+    
+    
   }
   
 }
@@ -77,4 +101,8 @@ void keyPressed(){
   tri.commitToVertices();
   
   tri.add(violet);
+  
+  closest = tri.getClosestPointTo(violet);
+  println("Closest:");
+  println(closest);
 }

@@ -156,88 +156,130 @@ class Triangle {
   }
   */
   
+  /*
+  //void add(Vertex v){
+  //  //Project the vertex v onto the plane containing the triangle
+  //  PVector projectedPos = v.location.copy(); //<>//
+  //  PVector normal = normal();
+  //  normal.normalize();
+  //  float dist = projectedPos.dot(normal);
+  //  normal.setMag(dist);
+  //  projectedPos.sub(normal);
+    
+  //  float a = area();
+  //  float a0 = area(vertices[0].location, vertices[1].location, projectedPos);
+  //  float a1 = area(vertices[1].location, vertices[2].location, projectedPos);
+  //  float a2 = area(vertices[2].location, vertices[0].location, projectedPos);
+  //  println(projectedPos);
+  //  println(a);
+  //  println(a0);
+  //  println(a1);
+  //  println(a2);
+  //  float p0 = perimeter(vertices[0], vertices[1], v);
+  //  float p1 = perimeter(vertices[1], vertices[2], v);
+  //  float p2 = perimeter(vertices[2], vertices[0], v);
+  //  float splitAreaToPerimeterRatio = (a0+a1+a2);
+    
+    
+    
+  //  //Case 1: the point is inside the triangle
+  //  if(splitAreaToPerimeterRatio<a*1.01){
+  //    split(v);
+  //    return;
+  //  }
+    
+    
+  //  PVector temp = v.location;
+  //  v.location = projectedPos;
+    
+  //  //Generate all posibilities of couples of triangles.
+  //  Vertex[] vertPool = {vertices[0],vertices[1],vertices[2],v};
+  //  final int[] i1 = {0,0,0,1,1,2};
+  //  final int[] i2 = {1,2,3,2,3,3};
+  //  //Create a pair of triangles with the smallest net 
+  //  //perimeter to area ratio
+  //  Triangle m1,m2 = new Triangle(null,null,null);
+  //  int minI = -1; //Useful for knowing if the shared edge contains this triangle's
+  //                 //master vertex. 0-2 if it does, 3-5 otherwise
+  //  float maxAreaToPerimeterRatio = Float.POSITIVE_INFINITY;
+  //  //For each unique edge that the two triangles can share
+  //  for(int i = 0; i < 6; i++){
+  //    //Ceate a pair of triangles and get their perimeter
+  //    Triangle t1 = new Triangle(vertPool[i1[i]],vertPool[i2[i]],vertPool[i1[5-i]]);
+  //    Triangle t2 = new Triangle(vertPool[i1[i]],vertPool[i2[i]],vertPool[i2[5-i]]);
+  //    float thisRatio = (t1.area()+t2.area());
+  //    //Use this ratio to find the roundest pair of triangles
+  //    if(thisRatio<maxAreaToPerimeterRatio){
+  //      maxAreaToPerimeterRatio = thisRatio;
+  //      m1=t1;
+  //      m2=t2;
+  //      minI = i;
+  //    }
+  //  }
+    
+  //  v.location = temp;
+    
+  //  //Case 2: the point is outside the triangle
+  //  //To optimize triangle structure, every triangle has a master vertex at
+  //  //index 0. This should not be changed in a triangle because each vertex stores
+  //  //a list of triangles it owns, and it is time consuming to remove triangles from
+  //  //lists. So restructure this triangle, but don't touch its master vertex.
+    
+  //  //If the two triangles share an edge that contains the master vertex, just
+  //  //change this triangle to m1 and continue living life.
+    
+  //  //Actually, it turns out that the triangle m1 is the only triangle to contain
+  //  //this triangle's master vertex, so we're fine
+  //  vertices[1] = vertPool[i2[minI]];
+  //  if(minI<3)
+  //    vertices[2] = vertPool[i1[5-minI]];
+  //  else
+  //    vertices[2] = vertPool[i1[minI]];
+    
+  //  Triangle thomas = m2;
+  //  thomas.commitToVertices();
+  //}
+  */
+  
   void add(Vertex v){
-    //Project the vertex v onto the plane containing the triangle
-    PVector projectedPos = v.location.copy(); //<>//
-    PVector normal = normal();
-    normal.normalize();
-    float dist = projectedPos.dot(normal);
-    normal.setMag(dist);
-    projectedPos.sub(normal);
-    
-    float a = area();
-    float a0 = area(vertices[0].location, vertices[1].location, projectedPos);
-    float a1 = area(vertices[1].location, vertices[2].location, projectedPos);
-    float a2 = area(vertices[2].location, vertices[0].location, projectedPos);
-    println(projectedPos);
-    println(a);
-    println(a0);
-    println(a1);
-    println(a2);
-    float p0 = perimeter(vertices[0], vertices[1], v);
-    float p1 = perimeter(vertices[1], vertices[2], v);
-    float p2 = perimeter(vertices[2], vertices[0], v);
-    float splitAreaToPerimeterRatio = (a0+a1+a2);
-    
-    
-    
-    //Case 1: the point is inside the triangle
-    if(splitAreaToPerimeterRatio<a*1.01){
-      split(v);
-      return;
-    }
-    
-    
-    PVector temp = v.location;
-    v.location = projectedPos;
-    
-    //Generate all posibilities of couples of triangles.
-    Vertex[] vertPool = {vertices[0],vertices[1],vertices[2],v};
-    final int[] i1 = {0,0,0,1,1,2};
-    final int[] i2 = {1,2,3,2,3,3};
-    //Create a pair of triangles with the smallest net 
-    //perimeter to area ratio
-    Triangle m1,m2 = new Triangle(null,null,null);
-    int minI = -1; //Useful for knowing if the shared edge contains this triangle's
-                   //master vertex. 0-2 if it does, 3-5 otherwise
-    float maxAreaToPerimeterRatio = Float.POSITIVE_INFINITY;
-    //For each unique edge that the two triangles can share
-    for(int i = 0; i < 6; i++){
-      //Ceate a pair of triangles and get their perimeter
-      Triangle t1 = new Triangle(vertPool[i1[i]],vertPool[i2[i]],vertPool[i1[5-i]]);
-      Triangle t2 = new Triangle(vertPool[i1[i]],vertPool[i2[i]],vertPool[i2[5-i]]);
-      float thisRatio = (t1.area()+t2.area());
-      //Use this ratio to find the roundest pair of triangles
-      if(thisRatio<maxAreaToPerimeterRatio){
-        maxAreaToPerimeterRatio = thisRatio;
-        m1=t1;
-        m2=t2;
-        minI = i;
-      }
-    }
-    
-    v.location = temp;
-    
-    //Case 2: the point is outside the triangle
-    //To optimize triangle structure, every triangle has a master vertex at
-    //index 0. This should not be changed in a triangle because each vertex stores
-    //a list of triangles it owns, and it is time consuming to remove triangles from
-    //lists. So restructure this triangle, but don't touch its master vertex.
-    
-    //If the two triangles share an edge that contains the master vertex, just
-    //change this triangle to m1 and continue living life.
-    
-    //Actually, it turns out that the triangle m1 is the only triangle to contain
-    //this triangle's master vertex, so we're fine
-    vertices[1] = vertPool[i2[minI]];
-    if(minI<3)
-      vertices[2] = vertPool[i1[5-minI]];
-    else
-      vertices[2] = vertPool[i1[minI]];
-    
-    Triangle thomas = m2;
-    thomas.commitToVertices();
+    //Get the relative coordinates of the projection of vertex v onto the plane formed by this triangle
+    PVector v1 = PVector.sub(vertices[1].location, vertices[0].location), v2 = PVector.sub(vertices[2].location, vertices[0].location);
+    float[][] basisArr = {{v1.x,v1.y,v1.z},{v2.x,v2.y,v2.z}};
+    float[][] basisTArr = {{v1.x,v2.x},{v1.y,v2.y},{v1.z,v2.z}};
+    Matrix a = Matrix.array(basisArr);
+    Matrix at = Matrix.array(basisTArr);
+    Matrix ata = Matrix.Multiply(a,at);
+    println("ATA");
+    Matrix.print(ata);
+    float[][] bArr = {{v.location.x-vertices[0].location.x,v.location.y-vertices[0].location.y,v.location.z-vertices[0].location.z}};
+    Matrix atb = Matrix.Multiply(Matrix.array(bArr),at);
+    Matrix result = Matrix.Multiply(atb,Matrix.inverse(ata));
+    println(result);
+    Matrix.print(result);
   }
+  
+  PVector getClosestPointTo(Vertex v){
+    //Get the relative coordinates of the projection of vertex v onto the plane formed by this triangle
+    PVector v1 = PVector.sub(vertices[1].location, vertices[0].location), v2 = PVector.sub(vertices[2].location, vertices[0].location);
+    float[][] basisArr = {{v1.x,v1.y,v1.z},{v2.x,v2.y,v2.z}};
+    float[][] basisTArr = {{v1.x,v2.x},{v1.y,v2.y},{v1.z,v2.z}};
+    Matrix a = Matrix.array(basisArr);
+    Matrix at = Matrix.array(basisTArr);
+    Matrix ata = Matrix.Multiply(a,at);
+    println("ATA");
+    Matrix.print(ata);
+    float[][] bArr = {{v.location.x-vertices[0].location.x,v.location.y-vertices[0].location.y,v.location.z-vertices[0].location.z}};
+    Matrix atb = Matrix.Multiply(Matrix.array(bArr),at);
+    Matrix result = Matrix.Multiply(atb,Matrix.inverse(ata));
+    println(result);
+    Matrix.print(result);
+    
+    PVector ret = vertices[0].location.copy();
+    ret.add(v1.mult(result.array[0][0]));
+    ret.add(v2.mult(result.array[0][1]));
+    return ret;
+  }
+  
   
   public void flipNormal(){
     Vertex temp = vertices[1];
